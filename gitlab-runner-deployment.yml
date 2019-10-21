@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-runner
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+      tier: runner
+  template:
+    metadata:
+      labels:
+        app: gitlab
+        tier: runner
+    spec:
+      containers:
+      - name: gitlab-runner
+        image: gitlab/gitlab-runner:latest        
+        volumeMounts:
+        - mountPath: /var/run/docker.sock
+          name: docker-sock
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
+          type: Socket
+          
+        

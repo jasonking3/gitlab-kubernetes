@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gitlab-server
+  labels:
+    app: gitlab
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: YOUR_GITLAB_FQDN
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+      name: http
+    - port: 22
+      targetPort: 22
+      name: ssh
+  selector:
+    app: gitlab
+    tier: server
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-server
+  labels:
+    app: gitlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab
+      tier: server
+  template:
+    metadata:
+      labels:
+        app: gitlab
+        tier: server
+    spec:
+      containers:
+      - image: gitlab/gitlab-ce:latest
+        name: gitlab-server
+        env:
+        - name: GITLAB_OMNIBUS_CONFIG
+          value: "external_url 'http://YOUR_GITLAB_FQDN>.net:8081';"
+        ports:
+        - containerPort: 8081
+        - containerPort: 22
+        volumeMounts:
+          - mountPath: "/etc/gitlab"
+            name: gitlab-config
+          - mountPath: "/var/log/gitlab"
+            name: gitlab-logs
+          - mountPath: "/var/opt/gitlab"
+            name: gitlab-data         
+      volumes:
+      - name: gitlab-data
+        persistentVolumeClaim:
+          claimName: gitlab-data-claim
+      - name: gitlab-logs
+        persistentVolumeClaim:
+          claimName: gitlab-logs-claim
+      - name: gitlab-config
+        persistentVolumeClaim:
+          claimName: gitlab-config-claim
+        
