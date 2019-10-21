@@ -43,7 +43,7 @@ spec:
         name: gitlab-server
         env:
         - name: GITLAB_OMNIBUS_CONFIG
-          value: "external_url 'http://YOUR_GITLAB_FQDN>.net:8081';"
+          value: "external_url 'http://YOUR_GITLAB_FQDN:8081';"
         ports:
         - containerPort: 8081
         - containerPort: 22
